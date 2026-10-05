@@ -4,9 +4,9 @@ Compara a saída de modelos de IA em uma única interface. Você escreve um prom
 
 ## Estado atual
 
-Etapa 1 do plano de 7 etapas concluída, com boa parte das etapas 2, 3, 4, 6 e 7 já no código mas ainda não fechadas. A descrição mais honesta é esta:
+Etapa 1 de 7 concluída. Partes das etapas 2, 3, 4, 6 e 7 já estão implementadas, mas essas etapas ainda não foram concluídas.
 
-**O aplicativo funciona em modo demonstração. A camada de provedores está pronta, mas a interface para configurar e usar provedores reais não foi construída.**
+**O aplicativo funciona em modo demonstração. Os adaptadores de provedores estão implementados, mas falta a interface para configurar e usar provedores reais.**
 
 O que funciona hoje:
 
@@ -18,11 +18,11 @@ O que funciona hoje:
 
 O que não funciona:
 
-- **Não há interface para cadastrar provedor nem chave de API.** As telas `/providers` e `/models` são stubs. Um adaptador compatível com OpenAI chega a pedir que o usuário cadastre um provedor, e não há onde fazer isso.
+- **Não há interface para cadastrar provedor nem chave de API.** As telas `/providers` e `/models` ainda não têm essa funcionalidade. Um adaptador compatível com OpenAI chega a pedir que o usuário cadastre um provedor, e não há onde fazer isso.
 - **A rota que lista modelos devolve sempre a lista de demonstração**, sem ler o banco.
 - **Não há persistência.** O botão de salvar o prompt abre um aviso de que o salvamento chega na etapa 5. O histórico fica só no `localStorage`.
 - **Cancelar não aborta a chamada ao provedor.** Só o adaptador de demonstração respeita o sinal de aborto; os outros cinco o descartam.
-- **Não há teste de integração nem de teste de ponta a ponta.** As pastas existem, mas estão vazias.
+- **Não há testes de integração nem de ponta a ponta.** As pastas existem, mas estão vazias.
 - **Faltam 12 das 15 operações de servidor** descritas na especificação do projeto.
 
 ## Funcionalidades implementadas
@@ -34,7 +34,7 @@ O que não funciona:
 - Painel de parâmetros: temperatura, máximo de tokens, `top_p`, penalidade de frequência, penalidade de presença, semente e formato de resposta. O painel avisa que nem todo provedor suporta tudo, e parâmetros incompatíveis são descartados.
 - Execução paralela com `Promise.allSettled`: se um provedor falhar, os outros resultados aparecem mesmo assim.
 - Cancelar, que aborta a requisição no navegador e avisa o servidor.
-- Skeleton de carregamento por modelo enquanto a resposta não volta.
+- Indicador de carregamento por modelo enquanto a resposta não chega.
 - Tema claro e escuro.
 
 ### Cartões de resultado
@@ -185,7 +185,7 @@ Imagem em múltiplas etapas sobre `node:20-alpine`, rodando como usuário não-r
 7. Use **Copiar como Markdown** para levar a resposta embora.
 8. A execução é salva no histórico, que fica na página `/history`.
 
-Como a interface não tem cadastro de provedor, o caminho real para usar um provedor de verdade ainda não existe na aplicação. Os adaptadores estão prontos e testados, mas falta a tela para configurá-los.
+Ainda não é possível configurar provedores reais pela interface. Os adaptadores estão implementados e possuem testes unitários, mas falta a tela de configuração. A existência desses testes não confirma que eles passam atualmente.
 
 ## Organização do projeto
 
