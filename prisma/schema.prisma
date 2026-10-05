@@ -1,0 +1,141 @@
+// Prompt Arena - Prisma schema
+// See https://pris.ly/d/prisma-schema for documentation
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Provider {
+  id           String   @id @default(cuid())
+  name         String
+  adapterType    String
+  baseUrl        String?
+  encryptedKey   String?
+  extraHeaders   String?
+  timeoutMs      Int      @default(60000)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  models         Model[]
+  runResults     RunResult[]
+
+  @@index([adapterType])
+}
+
+model Model {
+  id                String   @id @default(cuid())
+  providerId        String
+  provider          Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  technicalId       String
+  displayName       String
+  maxContext        Int?
+  inputPricePer1M   String?
+  outputPricePer1M  String?
+  currency          String   @default("USD")
+  isLocal           Boolean  @default(false)
+  active            Boolean  @default(true)
+  supportsStreaming Boolean  @default(true)
+  metadata          String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([providerId, technicalId])
+  @@index([providerId])
+}
+
+model Prompt {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  systemPrompt String?
+  content     String
+  tags        String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  variables   PromptVariable[]
+  runs        Run[]
+
+  @@index([title])
+}
+
+model PromptVariable {
+  id           String  @id @default(cuid())
+  promptId     String
+  prompt       Prompt  @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  name         String
+  defaultValue String?
+
+  @@unique([promptId, name])
+  @@index([promptId])
+}
+
+model Run {
+  id           String   @id @default(cuid())
+  promptId     String?
+  prompt       Prompt?  @relation(fields: [promptId], references: [id])
+  systemPrompt String?
+  finalPrompt  String
+  variablesUsed String?
+  parameters    String?
+  status       String   @default("RUNNING")
+  demoMode     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  results      RunResult[]
+
+  @@index([createdAt])
+  @@index([promptId])
+}
+
+model RunResult {
+  id                String   @id @default(cuid())
+  runId             String
+  run               Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  providerId        String?
+  provider          Provider? @relation(fields: [providerId], references: [id])
+  modelTechnicalId  String
+  modelName         String
+  content           String?
+  status            String   @default("RUNNING")
+  inputTokens       Int?
+  outputTokens      Int?
+  totalTokens       Int?
+  latencyMs         Int?
+  timeToFirstTokenMs Int?
+  estimatedCost     String?
+  finishReason      String?
+  usedStreaming     Boolean  @default(false)
+  parameters        String?
+  errorCode         String?
+  errorMessage      String?
+  errorProvider     String?
+  errorRetryable    Boolean  @default(false)
+  favorite          Boolean  @default(false)
+  rawMetadata       String?
+  startedAt         DateTime @default(now())
+  finishedAt        DateTime?
+  evaluation        Evaluation?
+
+  @@index([runId])
+}
+
+model Evaluation {
+  id          String   @id @default(cuid())
+  runResultId String   @unique
+  runResult   RunResult @relation(fields: [runResultId], references: [id], onDelete: Cascade)
+  stars       Int
+  criteria    String?
+  comment     String?
+  blindMode   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AppSetting {
+  key   String @id
+  value String
+}

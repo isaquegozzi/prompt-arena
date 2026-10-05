@@ -1,0 +1,19 @@
+services:
+  prompt-arena:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prompt-arena
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:/app/prisma/dev.db
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change-me-please-32-bytes-key-}
+      - DEMO_MODE=${DEMO_MODE:-true}
+      - NEXT_PUBLIC_APP_NAME=Prompt Arena
+    volumes:
+      - prompt-arena-db:/app/prisma
+    restart: unless-stopped
+
+volumes:
+  prompt-arena-db:
